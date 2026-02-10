@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { collection, query, where, getDocs } from "firebase/firestore";
-
 import { Link } from "react-router-dom";
 import { db } from "../firebase/firebaseConfig/firebase";
 
 function MyTickets() {
-  const user = useSelector((state) => state.auth.user);
-  const [tickets, setTickets] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const user = useSelector((state) => state.auth.user); // Logged-in user
+  const [tickets, setTickets] = useState([]); // User tickets
+  const [loading, setLoading] = useState(true); // Loading state
 
+  // ✅ Fetch tickets for logged-in user
   useEffect(() => {
     if (!user) return;
 
@@ -27,7 +27,7 @@ function MyTickets() {
         }));
         setTickets(data);
       } catch (err) {
-        console.error(err);
+        console.error("Error fetching tickets:", err);
       } finally {
         setLoading(false);
       }
@@ -36,23 +36,60 @@ function MyTickets() {
     fetchTickets();
   }, [user]);
 
-  if (loading) return <p className="p-6 text-center">Loading your tickets...</p>;
-  if (!tickets.length) return <p className="p-6 text-center">You have no tickets yet.</p>;
+  // ✅ Loading state
+  if (loading)
+    return (
+      <p className="p-6 text-center text-gray-600 text-lg">Loading your tickets...</p>
+    );
+
+  // ✅ No tickets message
+  if (!tickets.length)
+    return (
+      <p className="p-6 text-center text-gray-600 text-lg">
+        You have no tickets yet.
+      </p>
+    );
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-4">My Tickets</h1>
-      <div className="space-y-4">
+    <div className="max-w-5xl mx-auto p-6">
+      {/* Page Heading */}
+      <h1 className="text-3xl font-bold mb-6 text-gray-800 text-center">
+        My Tickets
+      </h1>
+
+      {/* Tickets List */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {tickets.map((ticket) => (
-          <div key={ticket.id} className="p-4 border rounded shadow flex justify-between items-center">
+          <div
+            key={ticket.id}
+            className="bg-white p-6 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 flex flex-col justify-between"
+          >
+            {/* Ticket Info */}
             <div>
-              <p><strong>Event:</strong> {ticket.eventName}</p>
-              <p><strong>Date:</strong> {ticket.eventDate}</p>
-              <p><strong>Status:</strong> {ticket.status}</p>
+              <p className="text-lg font-semibold text-gray-800 mb-2">
+                {ticket.eventName}
+              </p>
+              <p className="text-gray-600 mb-1">
+                <strong>Date:</strong> {ticket.eventDate}
+              </p>
+              <p className="text-gray-600 mb-1">
+                <strong>Status:</strong>{" "}
+                <span
+                  className={
+                    ticket.status === "Booked"
+                      ? "text-green-600 font-semibold"
+                      : "text-red-500 font-semibold"
+                  }
+                >
+                  {ticket.status}
+                </span>
+              </p>
             </div>
+
+            {/* View Ticket Button */}
             <Link
               to={`/ticket/${ticket.id}`}
-              className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
+              className="mt-4 inline-block bg-indigo-600 text-white text-center py-2 px-4 rounded-xl font-semibold hover:bg-indigo-700 transition-colors duration-300"
             >
               View Ticket
             </Link>
