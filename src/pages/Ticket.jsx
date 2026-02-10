@@ -1,8 +1,8 @@
 import React from 'react'
-
+import  QrTicket from '../components/QrTicket'
 const Ticket = () => {
   return (
-    <div>Ticket</div>
+   <QrTicket/>
   )
 }
 
