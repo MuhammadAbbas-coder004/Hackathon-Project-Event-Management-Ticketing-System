@@ -15,15 +15,14 @@ import Navbar from './components/Navbar'
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import Home from "./pages/Home";
-import Dashboard from "./pages/Dashboard";
+
 import CreateEvent from "./pages/CreateEvent";
 import EventDetails from "./pages/EventDetails";
 import MyTickets from "./pages/MyTickets";
 
-import ValidateTicket from "./pages/ValidateTicket";
 import NotFound from "./pages/NotFound";
 import Ticket from "./pages/Ticket";
-
+import Organizer from "./pages/Organizer";
 
 // Auth Persistence Component
 function AuthProvider({ children }) {
@@ -67,7 +66,7 @@ const App = () => {
     <Provider store={store}>
       <BrowserRouter>
         <AuthProvider>
-          {/* ✅ Navbar always visible */}
+          {/*Navbar always visible */}
           <Navbar />
 
           <Routes>
@@ -115,7 +114,7 @@ const App = () => {
               element={
                 <ProtectedRoutes
                   role={["organizer"]}
-                  component={<Dashboard />}
+                  component={<Organizer />}
                 />
               }
             />
@@ -125,16 +124,6 @@ const App = () => {
                 <ProtectedRoutes
                   role={["organizer"]}
                   component={<CreateEvent />}
-                />
-              }
-            />
-        
-            <Route
-              path="/validate-ticket"
-              element={
-                <ProtectedRoutes
-                  role={["organizer"]}
-                  component={<ValidateTicket />}
                 />
               }
             />
