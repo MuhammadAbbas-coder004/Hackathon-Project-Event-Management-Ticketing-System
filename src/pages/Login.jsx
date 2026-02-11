@@ -6,37 +6,31 @@ import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig/firebase";
 
 function Login() {
-  // State variables for form inputs
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const dispatch = useDispatch(); // Redux dispatch function
-  const navigate = useNavigate(); // React Router navigate function
-  const { loading, error } = useSelector((state) => state.auth); // Access auth state from Redux
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { loading, error } = useSelector((state) => state.auth);
 
-  // Function to handle login form submission
   const handleLogin = async (e) => {
-    e.preventDefault(); // Prevent default form submit
+    e.preventDefault();
 
     try {
-      // Dispatch login action from Redux
       const result = await dispatch(signInUser({ email, password }));
 
-      // Check if login was successful
       if (signInUser.fulfilled.match(result)) {
         const user = result.payload;
 
-        // Fetch user role from Firestore
         const usersRef = collection(db, "users");
         const q = query(usersRef, where("email", "==", user.email));
         const querySnapshot = await getDocs(q);
 
-        let role = "attendee"; // Default role
+        let role = "attendee";
         if (!querySnapshot.empty) {
-          role = querySnapshot.docs[0].data().role; // Get role from Firestore
+          role = querySnapshot.docs[0].data().role;
         }
 
-        // Navigate based on role
         if (role === "organizer") {
           navigate("/dashboard", { replace: true });
         } else {
@@ -49,10 +43,9 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      {/* Split layout: Left info panel and Right form */}
+    <div className="min-h-screen flex items-start sm:items-center justify-center bg-gray-50 px-4 py-16 sm:py-20">
       <div className="flex w-full max-w-5xl shadow-lg rounded-2xl overflow-hidden bg-white">
-        {/* Left panel with info */}
+        {/* Left panel */}
         <div className="hidden md:flex w-1/2 bg-indigo-600 text-white flex-col justify-center p-10">
           <h2 className="text-4xl font-bold mb-4">Welcome Back</h2>
           <p className="text-gray-200 leading-relaxed">
@@ -61,22 +54,19 @@ function Login() {
           </p>
         </div>
 
-        {/* Right panel with form */}
-        <div className="w-full md:w-1/2 p-10">
+        {/* Right panel */}
+        <div className="w-full md:w-1/2 p-10 flex flex-col justify-start">
           <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
             Login
           </h2>
 
-          {/* Error message */}
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm mb-4">
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm mb-4 text-center">
               {error}
             </div>
           )}
 
-          {/* Login form */}
           <form onSubmit={handleLogin} className="space-y-5">
-            {/* Email input */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Email
@@ -91,7 +81,6 @@ function Login() {
               />
             </div>
 
-            {/* Password input */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Password
@@ -106,13 +95,13 @@ function Login() {
               />
             </div>
 
-            {/* Login button with spinner when loading */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold text-lg flex items-center justify-center disabled:bg-gray-400 transition-colors duration-300 hover:bg-indigo-700"
+              className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold text-lg flex items-center justify-center
+                         disabled:bg-gray-400 transition transform hover:-translate-y-0.5 hover:scale-105 hover:bg-indigo-700 duration-300"
             >
-              {loading ? (
+              {loading && (
                 <svg
                   className="animate-spin h-5 w-5 text-white mr-2"
                   xmlns="http://www.w3.org/2000/svg"
@@ -133,16 +122,15 @@ function Login() {
                     d="M4 12a8 8 0 018-8v4l3.5-3.5-3.5-3.5V4a8 8 0 100 16v-4l-3.5 3.5 3.5 3.5v-4a8 8 0 01-8-8z"
                   ></path>
                 </svg>
-              ) : null}
+              )}
               {loading ? "Logging in..." : "Login"}
             </button>
           </form>
 
-          {/* Link to signup page */}
           <p className="text-center text-gray-600 mt-6">
             Don’t have an account?{" "}
-            <Link to="/signup" className="text-indigo-600 font-medium">
-              Sign Up
+            <Link to="/signup" className="text-indigo-600 font-medium hover:underline">
+              Create Account
             </Link>
           </p>
         </div>

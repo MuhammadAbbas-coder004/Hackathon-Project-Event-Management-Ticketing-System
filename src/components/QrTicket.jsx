@@ -44,7 +44,7 @@ function Ticket() {
   });
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="min-h-screen flex items-start sm:items-center justify-center bg-gray-50 px-4 pt-20 sm:pt-0">
       {/* Ticket card */}
       <div className="max-w-md w-full bg-white rounded-3xl shadow-xl p-8 text-center">
         {/* Event Name */}

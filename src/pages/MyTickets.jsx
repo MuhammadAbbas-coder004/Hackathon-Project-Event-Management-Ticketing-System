@@ -5,11 +5,11 @@ import { Link } from "react-router-dom";
 import { db } from "../firebase/firebaseConfig/firebase";
 
 function MyTickets() {
-  const user = useSelector((state) => state.auth.user); // Logged-in user
-  const [tickets, setTickets] = useState([]); // User tickets
-  const [loading, setLoading] = useState(true); // Loading state
+  const user = useSelector((state) => state.auth.user); 
+  const [tickets, setTickets] = useState([]); 
+  const [loading, setLoading] = useState(true); 
 
-  // ✅ Fetch tickets for logged-in user
+  // Fetch tickets for logged-in user
   useEffect(() => {
     if (!user) return;
 
@@ -36,13 +36,13 @@ function MyTickets() {
     fetchTickets();
   }, [user]);
 
-  // ✅ Loading state
+  // Loading state
   if (loading)
     return (
       <p className="p-6 text-center text-gray-600 text-lg">Loading your tickets...</p>
     );
 
-  // ✅ No tickets message
+  // No tickets message
   if (!tickets.length)
     return (
       <p className="p-6 text-center text-gray-600 text-lg">

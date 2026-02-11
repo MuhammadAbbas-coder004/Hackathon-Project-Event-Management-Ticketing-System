@@ -23,6 +23,7 @@ import MyTickets from "./pages/MyTickets";
 import NotFound from "./pages/NotFound";
 import Ticket from "./pages/Ticket";
 import Organizer from "./pages/Organizer";
+import TicketScanner from "./pages/TicketScanner"; 
 
 // Auth Persistence Component
 function AuthProvider({ children }) {
@@ -66,12 +67,12 @@ const App = () => {
     <Provider store={store}>
       <BrowserRouter>
         <AuthProvider>
-          {/*Navbar always visible */}
+          {/* Navbar always visible */}
           <Navbar />
 
           <Routes>
             {/* PUBLIC */}
-            <Route index element={<Home/>} />
+            <Route index element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
 
@@ -100,11 +101,10 @@ const App = () => {
                 />
               }
             />
-          
             <Route
               path="/ticket/:ticketId"
               element={
-                <ProtectedRoutes role={["attendee"]} component={<Ticket/>} />
+                <ProtectedRoutes role={["attendee"]} component={<Ticket />} />
               }
             />
 
@@ -124,6 +124,17 @@ const App = () => {
                 <ProtectedRoutes
                   role={["organizer"]}
                   component={<CreateEvent />}
+                />
+              }
+            />
+
+            {/* Organizer TicketScanner */}
+            <Route
+              path="/ticket-scanner"
+              element={
+                <ProtectedRoutes
+                  role={["organizer"]}
+                  component={<TicketScanner />}
                 />
               }
             />
