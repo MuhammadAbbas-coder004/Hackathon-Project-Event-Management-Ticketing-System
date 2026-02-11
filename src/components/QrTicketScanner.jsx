@@ -157,7 +157,6 @@ function ScanTicket() {
     setScanning(false);
   };
 
- 
   // Reset Scanner
 
   const resetScanner = () => {
