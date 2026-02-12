@@ -1,4 +1,3 @@
-// src/pages/Dashboard.jsx
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { collection, getDocs, doc, getDoc, updateDoc, Timestamp } from "firebase/firestore";
@@ -52,6 +51,7 @@ function Dashboard() {
     fetchEvents();
   }, []);
 
+  // Fetch attendees for selected event
   const fetchAttendees = async (event, validate = false) => {
     setSelectedEvent(event);
     setShowValidate(validate);
@@ -71,6 +71,7 @@ function Dashboard() {
     }
   };
 
+  // Validate ticket
   const handleValidate = async (ticket) => {
     try {
       const ticketRef = doc(db, "tickets", ticket.id);
@@ -84,12 +85,14 @@ function Dashboard() {
     }
   };
 
+  // Format date
   const formatDate = (date) => {
     if (!date) return "N/A";
     if (date instanceof Timestamp) return date.toDate().toLocaleDateString();
     return new Date(date).toLocaleDateString();
   };
 
+  // Filter attendees by search
   const filteredAttendees = attendees.filter(
     (att) =>
       att.name?.toLowerCase().includes(search.toLowerCase()) ||
@@ -146,6 +149,11 @@ function Dashboard() {
             )}
             <div className="p-4 sm:p-6 flex flex-col flex-1">
               <h3 className="text-lg sm:text-xl font-bold text-gray-800">{event.name}</h3>
+
+              <p className="text-gray-500 mt-1 text-xs sm:text-sm">
+                Location: {event.location || "N/A"}
+              </p>
+
               <p className="text-gray-500 mt-1 text-xs sm:text-sm">
                 Start Date: {formatDate(event.startDate)}
               </p>
@@ -158,11 +166,14 @@ function Dashboard() {
               <p className="text-gray-500 mt-1 text-xs sm:text-sm">
                 Ticket Price: ${event.ticketPrice}
               </p>
+
+              {/* Sold Out as Transparent Rounded Button with small gap */}
               {event.sold >= event.totalTickets && (
-                <span className="inline-block mt-1 text-xs sm:text-sm bg-red-500 text-white px-3 py-1 rounded-full">
+                <span className="mt-3 inline-block px-3 py-1 text-red-600 font-bold border border-red-600 rounded-full bg-transparent text-center">
                   Sold Out
                 </span>
               )}
+
               <div className="mt-4 flex flex-col sm:flex-row gap-2 sm:gap-3 mt-auto">
                 <button
                   onClick={() => fetchAttendees(event, false)}

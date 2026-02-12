@@ -1,4 +1,3 @@
-// src/pages/CreateEvent.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { collection, addDoc } from "firebase/firestore";
@@ -8,6 +7,7 @@ function CreateEvent() {
   const navigate = useNavigate();
 
   const [name, setName] = useState("");
+  const [location, setLocation] = useState(""); 
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [totalTickets, setTotalTickets] = useState("");
@@ -18,7 +18,7 @@ function CreateEvent() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!name || !startDate || !endDate || !totalTickets || !ticketPrice) {
+    if (!name || !location || !startDate || !endDate || !totalTickets || !ticketPrice) {
       alert("Please fill all required fields!");
       return;
     }
@@ -32,6 +32,7 @@ function CreateEvent() {
     try {
       await addDoc(collection(db, "events"), {
         name,
+        location, 
         startDate,
         endDate,
         totalTickets: Number(totalTickets),
@@ -54,6 +55,7 @@ function CreateEvent() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-start justify-center pt-4 sm:pt-6 p-4 sm:p-6">
       <div className="flex flex-col md:flex-row w-full max-w-4xl shadow-lg rounded-2xl overflow-hidden bg-white">
+        
         {/* Left panel */}
         <div className="hidden md:flex w-1/2 bg-indigo-600 text-white flex-col justify-center p-10 sm:p-12">
           <h2 className="text-3xl sm:text-4xl font-bold mb-3 sm:mb-4">Create Your Event</h2>
@@ -69,11 +71,21 @@ function CreateEvent() {
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+
             <input
               type="text"
               placeholder="Event Name"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              className="w-full border border-gray-300 px-3 py-2 sm:px-5 sm:py-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition text-sm sm:text-lg"
+              required
+            />
+
+            <input
+              type="text"
+              placeholder="Event Location"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
               className="w-full border border-gray-300 px-3 py-2 sm:px-5 sm:py-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition text-sm sm:text-lg"
               required
             />
@@ -152,6 +164,7 @@ function CreateEvent() {
               ) : null}
               {loading ? "Creating..." : "Create Event"}
             </button>
+
           </form>
         </div>
       </div>

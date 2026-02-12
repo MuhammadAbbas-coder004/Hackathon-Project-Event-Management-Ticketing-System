@@ -1,57 +1,83 @@
+// src/pages/Home.jsx
 import React, { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { Link } from "react-router-dom";
 import { db } from "../firebase/firebaseConfig/firebase";
 
+// Swiper imports
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Pagination, Autoplay } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+
 function Home() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch events from Firestore
+  // Fetch events
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, "events"));
-        const eventsData = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setEvents(eventsData);
-      } catch (error) {
-        console.error("Error fetching events:", error);
+        const snapshot = await getDocs(collection(db, "events"));
+        const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        setEvents(data);
+      } catch (err) {
+        console.error("Error fetching events:", err);
       } finally {
         setLoading(false);
       }
     };
-
     fetchEvents();
   }, []);
 
-  const formatDate = (date) => {
-    if (!date) return "N/A";
-    return new Date(date).toLocaleDateString();
-  };
+  const formatDate = (date) => (date ? new Date(date).toLocaleDateString() : "N/A");
 
-  if (loading) {
-    return (
-      <p className="text-center mt-10 text-gray-600 text-lg font-medium">
-        Loading events...
-      </p>
-    );
-  }
+  if (loading)
+    return <p className="text-center mt-10 text-gray-600 text-lg">Loading events...</p>;
+  if (events.length === 0)
+    return <p className="text-center mt-10 text-gray-600 text-lg">No events available.</p>;
 
   return (
-    <div className="p-6 bg-gradient-to-b from-gray-50 to-gray-100 min-h-screen">
-      {/* Page Heading */}
+    <div className="bg-gradient-to-b from-gray-50 to-gray-100 min-h-screen p-6">
+      {/* Fullscreen Carousel */}
+      <Swiper
+        modules={[Navigation, Pagination, Autoplay]}
+        spaceBetween={0}
+        slidesPerView={1} // sirf 1 image per slide
+        navigation
+        pagination={{ clickable: true }}
+        autoplay={{ delay: 4000, disableOnInteraction: false }}
+        loop={true}
+        className="w-full h-96 sm:h-[28rem] md:h-[32rem] lg:h-[36rem] rounded-3xl overflow-hidden shadow-lg mb-6"
+      >
+        {events.map((event) => (
+          <SwiperSlide key={event.id}>
+            <div className="relative w-full h-full">
+              <img
+                src={event.imageUrl || "https://via.placeholder.com/1200x600"}
+                alt={event.name}
+                className="w-full h-full object-cover transition-transform duration-500 transform hover:scale-105"
+              />
+              {/* Overlay Text */}
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6 text-white">
+                <h2 className="text-3xl sm:text-4xl font-bold truncate">{event.name}</h2>
+                <p className="text-sm sm:text-base truncate">{event.location || "N/A"}</p>
+              </div>
+            </div>
+          </SwiperSlide>
+        ))}
+      </Swiper>
+
+      {/* Heading above cards */}
       <h1 className="text-4xl font-extrabold text-center text-gray-900 mb-10 tracking-tight">
         Explore Upcoming Events
       </h1>
 
-      {/* Events Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-8">
+      {/* Event Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
         {events.map((event) => {
-          const ticketsLeft = event.totalTickets - event.sold;
-
+          const ticketsLeft = event.totalTickets - (event.sold || 0);
           return (
             <div
               key={event.id}
@@ -68,34 +94,19 @@ function Home() {
 
               {/* Event Details */}
               <div className="p-5 flex flex-col flex-1">
-                <h2 className="text-xl font-bold text-gray-800 truncate">
-                  {event.name}
-                </h2>
-                
-                <p className="text-gray-500 mt-1 text-sm">
-                  Start: {formatDate(event.startDate)}
-                </p>
-                <p className="text-gray-500 mt-1 text-sm">
-                  End: {formatDate(event.endDate)}
-                </p>
-                <p className="text-gray-500 mt-1 text-sm">
-                  Price: ${event.ticketPrice || "N/A"}
-                </p>
+                <h2 className="text-xl font-bold text-gray-800 truncate">{event.name}</h2>
+                <p className="text-gray-500 mt-1 text-sm">Location: {event.location || "N/A"}</p>
+                <p className="text-gray-500 mt-1 text-sm">Start: {formatDate(event.startDate)}</p>
+                <p className="text-gray-500 mt-1 text-sm">End: {formatDate(event.endDate)}</p>
+                <p className="text-gray-500 mt-1 text-sm">Price: ${event.ticketPrice || "N/A"}</p>
 
                 <p className="mt-2 text-gray-700 text-sm">
                   Tickets Left:{" "}
-                  <span
-                    className={
-                      ticketsLeft === 0
-                        ? "text-red-500 font-semibold"
-                        : "font-medium"
-                    }
-                  >
+                  <span className={ticketsLeft === 0 ? "text-red-500 font-semibold" : "font-medium"}>
                     {ticketsLeft}
                   </span>
                 </p>
 
-                {/* View Details button */}
                 <Link
                   to={`/events/${event.id}`}
                   className="mt-auto block text-center bg-indigo-600 text-white py-2 rounded-xl font-semibold text-sm transition-colors duration-300 hover:bg-indigo-700"

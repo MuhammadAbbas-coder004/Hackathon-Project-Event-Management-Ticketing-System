@@ -1,3 +1,4 @@
+// src/App.jsx
 import React, { useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Provider, useDispatch } from "react-redux";
@@ -10,16 +11,15 @@ import { setUser } from "./redux/reducers/authSlice";
 // Components
 import ProtectedRoutes from "./components/ProtectedRoutes";
 import Navbar from './components/Navbar'
+import Footer from './components/Footer'; // ✅ Footer import
 
 // Pages
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import Home from "./pages/Home";
-
 import CreateEvent from "./pages/CreateEvent";
 import EventDetails from "./pages/EventDetails";
 import MyTickets from "./pages/MyTickets";
-
 import NotFound from "./pages/NotFound";
 import Ticket from "./pages/Ticket";
 import Organizer from "./pages/Organizer";
@@ -142,6 +142,10 @@ const App = () => {
             {/* FALLBACK */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+
+          {/* ✅ Footer render */}
+          <Footer organizerName="Your Organizer Name" />
+
         </AuthProvider>
       </BrowserRouter>
     </Provider>

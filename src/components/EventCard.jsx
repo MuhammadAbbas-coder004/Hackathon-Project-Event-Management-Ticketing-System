@@ -24,7 +24,7 @@ function EventCard() {
   const [booking, setBooking] = useState(false);
   const [ticketData, setTicketData] = useState(null);
 
-  // Fetch event
+  // Fetch event data
   useEffect(() => {
     const fetchEvent = async () => {
       try {
@@ -42,7 +42,7 @@ function EventCard() {
     fetchEvent();
   }, [id]);
 
-  // Ticket booking
+  // Handle ticket booking
   const handleBookTicket = async () => {
     if (!user) {
       navigate("/login");
@@ -88,6 +88,7 @@ function EventCard() {
 
       setEvent((prev) => ({ ...prev, sold: (prev.sold || 0) + 1 }));
 
+      
       setTicketData({
         ticketId: ticketRef.id,
         eventName: event.name,
@@ -114,7 +115,6 @@ function EventCard() {
   return (
     <div className="max-w-3xl sm:max-w-4xl mx-auto p-3 sm:p-5">
       <div className="bg-white rounded-2xl shadow-md overflow-hidden sm:mx-2">
-        {/* Event Image */}
         {event.imageUrl && (
           <img
             src={event.imageUrl}
@@ -124,21 +124,39 @@ function EventCard() {
         )}
 
         <div className="p-3 sm:p-5 flex flex-col gap-2 sm:gap-3">
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-800">{event.name}</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-800">
+            {event.name}
+          </h1>
+
           <p className="text-gray-500 text-sm sm:text-base">
-            Start: {new Date(event.startDate).toLocaleDateString()}
+            Location: {event.location || "N/A"}
+          </p>
+
+          <p className="text-gray-500 text-sm sm:text-base">
+            Start: {new Date(event.startDate).toLocaleString()}
           </p>
           <p className="text-gray-500 text-sm sm:text-base">
-            End: {new Date(event.endDate).toLocaleDateString()}
+            End: {new Date(event.endDate).toLocaleString()}
           </p>
+
           <p className="text-gray-700 text-sm sm:text-base">
             Tickets Left:{" "}
-            <span className={ticketsLeft === 0 ? "text-red-500 font-semibold" : "font-semibold"}>
+            <span
+              className={
+                ticketsLeft === 0
+                  ? "text-red-500 font-semibold"
+                  : "font-semibold"
+              }
+            >
               {ticketsLeft}
             </span>
           </p>
-          <p className="text-gray-700 text-sm sm:text-base">Price: ${event.ticketPrice || 0}</p>
 
+          <p className="text-gray-700 text-sm sm:text-base">
+            Price: ${event.ticketPrice || 0}
+          </p>
+
+          {/* Book Ticket button with spinner */}
           <button
             onClick={handleBookTicket}
             disabled={booking || ticketsLeft === 0}
@@ -146,7 +164,7 @@ function EventCard() {
           >
             {booking ? (
               <svg
-                className="animate-spin h-4 w-4 sm:h-5 sm:w-5 text-white mr-2"
+                className="animate-spin h-5 w-5 mr-2 text-white"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -162,34 +180,25 @@ function EventCard() {
                 <path
                   className="opacity-75"
                   fill="currentColor"
-                  d="M4 12a8 8 0 018-8v4l3.5-3.5-3.5-3.5V4a8 8 0 100 16v-4l-3.5 3.5 3.5 3.5v-4a8 8 0 01-8-8z"
+                  d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4l-3 3 3 3h-4z"
                 ></path>
               </svg>
-            ) : null}
-            {booking ? "Booking..." : ticketsLeft === 0 ? "Sold Out" : "Book Ticket"}
+            ) : ticketsLeft === 0 ? (
+              "Sold Out"
+            ) : (
+              "Book Ticket"
+            )}
           </button>
 
-          {/* Ticket QR */}
           {ticketData && (
             <div className="mt-3 sm:mt-5 p-3 sm:p-5 border rounded-xl sm:rounded-2xl shadow bg-gray-50 text-center">
-              <h2 className="text-lg sm:text-xl font-bold mb-1 sm:mb-2">Your Ticket</h2>
-              <p className="text-gray-700 text-xs sm:text-sm mb-0.5 sm:mb-1">
-                <strong>Event:</strong> {ticketData.eventName}
+              <h2 className="text-lg sm:text-xl font-bold mb-2">Your Ticket</h2>
+              <p className="text-sm text-gray-700 mb-1">
+                User: {ticketData.userEmail}
               </p>
-              <p className="text-gray-700 text-xs sm:text-sm mb-0.5 sm:mb-1">
-                <strong>Start:</strong> {new Date(ticketData.startDate).toLocaleDateString()}
-              </p>
-              <p className="text-gray-700 text-xs sm:text-sm mb-0.5 sm:mb-1">
-                <strong>End:</strong> {new Date(ticketData.endDate).toLocaleDateString()}
-              </p>
-              <p className="text-gray-700 text-xs sm:text-sm mb-0.5 sm:mb-1">
-                <strong>Price:</strong> ${ticketData.price}
-              </p>
-              <p className="text-gray-700 text-xs sm:text-sm mb-0.5 sm:mb-1">
-                <strong>Email:</strong> {ticketData.userEmail}
-              </p>
-              <p className="text-gray-700 text-xs sm:text-sm mb-1 sm:mb-2">
-                <strong>Ticket ID:</strong> {ticketData.ticketId}
+              <p className="text-sm text-gray-700 mb-2">
+                Event Date: {new Date(ticketData.startDate).toLocaleString()} -{" "}
+                {new Date(ticketData.endDate).toLocaleString()}
               </p>
               <QRCodeSVG value={ticketData.ticketId} size={130} />
             </div>

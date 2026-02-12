@@ -25,11 +25,9 @@ const Navbar = () => {
   return (
     <nav className="bg-indigo-600 text-white shadow-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-        {/* Logo */}
-        <div className="text-2xl font-bold tracking-wide">
-          <Link to="/" className="hover:text-indigo-200 transition-colors duration-300">
-            TicketApp
-          </Link>
+        {/* Logo as Professional Text */}
+        <div className="text-2xl font-extrabold tracking-wide text-white transform hover:scale-105 transition duration-300 select-none">
+          EventNexus
         </div>
 
         {/* Desktop Links */}
@@ -66,7 +64,6 @@ const Navbar = () => {
                   <Link to="/create-event" className={linkClasses}>
                     Create Event
                   </Link>
-    
                   <Link to="/ticket-scanner" className={linkClasses}>
                     Ticket Scanner
                   </Link>
