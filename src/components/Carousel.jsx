@@ -5,6 +5,7 @@ import { db } from "../firebase/firebaseConfig/firebase";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination, Navigation } from "swiper";
 
+
 // Swiper styles
 import "swiper/css";
 import "swiper/css/pagination";
