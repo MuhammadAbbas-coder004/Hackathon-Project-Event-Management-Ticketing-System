@@ -11,7 +11,7 @@ import { setUser } from "./redux/reducers/authSlice";
 // Components
 import ProtectedRoutes from "./components/ProtectedRoutes";
 import Navbar from './components/Navbar'
-import Footer from './components/Footer'; // ✅ Footer import
+import Footer from './components/Footer'; 
 
 // Pages
 import Login from "./pages/Login";
@@ -143,7 +143,7 @@ const App = () => {
             <Route path="*" element={<NotFound />} />
           </Routes>
 
-          {/* ✅ Footer render */}
+          {/* Footer render */}
           <Footer organizerName="Your Organizer Name" />
 
         </AuthProvider>

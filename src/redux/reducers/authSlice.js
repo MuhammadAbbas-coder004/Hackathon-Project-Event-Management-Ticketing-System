@@ -8,7 +8,7 @@ import {
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../../firebase/firebaseConfig/firebase';
 
-// Async Thunk: Sign Up User
+// Async Thunk Sign Up User
 export const signUpUser = createAsyncThunk(
   'auth/signUp',
   async ({ email, password, name, role }, { rejectWithValue }) => {
@@ -107,7 +107,7 @@ const authSlice = createSlice({
     error: null,             
   },
   reducers: {
-    // Manually set user (used with Firebase onAuthStateChanged)
+    // Manually set user  used with Firebase onAuthStateChanged
     setUser: (state, action) => {
       state.user = action.payload;
       state.isAuthenticated = !!action.payload;

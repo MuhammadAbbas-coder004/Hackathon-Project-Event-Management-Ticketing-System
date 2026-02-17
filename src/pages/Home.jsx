@@ -1,10 +1,9 @@
-// src/pages/Home.jsx
 import React, { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { Link } from "react-router-dom";
 import { db } from "../firebase/firebaseConfig/firebase";
 
-// Swiper imports
+
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
@@ -44,7 +43,7 @@ function Home() {
       <Swiper
         modules={[Navigation, Pagination, Autoplay]}
         spaceBetween={0}
-        slidesPerView={1} // sirf 1 image per slide
+        slidesPerView={1} 
         navigation
         pagination={{ clickable: true }}
         autoplay={{ delay: 4000, disableOnInteraction: false }}

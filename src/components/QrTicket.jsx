@@ -5,9 +5,9 @@ import { QRCodeCanvas } from "qrcode.react";
 import { db } from "../firebase/firebaseConfig/firebase";
 
 function Ticket() {
-  const { ticketId } = useParams(); // URL se ticketId lena
-  const [ticket, setTicket] = useState(null); // Ticket data state
-  const [loading, setLoading] = useState(true); // Loading state
+  const { ticketId } = useParams(); 
+  const [ticket, setTicket] = useState(null); 
+  const [loading, setLoading] = useState(true); 
 
   // Fetch ticket details from Firestore
   useEffect(() => {
@@ -17,13 +17,13 @@ function Ticket() {
         const ticketSnap = await getDoc(ticketRef);
 
         if (ticketSnap.exists()) {
-          // Ticket data set karna
+          
           setTicket({ id: ticketSnap.id, ...ticketSnap.data() });
         }
       } catch (err) {
         console.error("Error fetching ticket:", err);
       } finally {
-        setLoading(false); // Loading complete
+        setLoading(false); 
       }
     };
     fetchTicket();

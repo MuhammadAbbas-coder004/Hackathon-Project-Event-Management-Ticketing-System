@@ -18,7 +18,7 @@ const ProtectedRoutes = ({ role, component }) => {
   }
 
   if (!role.includes(user.role)) {
-    // Role mismatch → redirect to their correct dashboard
+    // Role mismatch redirect to their correct dashboard
     return <Navigate to={user.role === "organizer" ? "/dashboard" : "/home"} replace />;
   }
 
