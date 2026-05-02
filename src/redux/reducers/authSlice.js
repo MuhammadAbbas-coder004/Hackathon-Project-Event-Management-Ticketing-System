@@ -37,12 +37,10 @@ export const signUpUser = createAsyncThunk(
         // We still proceed since Firebase Auth was successful
       }
 
-      return {
-        uid: userCredential.user.uid,
-        email: userCredential.user.email,
-        displayName: name,
-        role: role || 'attendee'
-      };
+      // Sign out immediately so they have to login
+      await signOut(auth);
+
+      return null;
     } catch (error) {
       console.error("SignUp Auth Error:", error);
       return rejectWithValue(error.message);
@@ -112,7 +110,8 @@ const authSlice = createSlice({
     isAuthenticated: false, 
     initializing: true,     
     loading: false,         
-    error: null,             
+    error: null,
+    isSigningUp: false,             
   },
   reducers: {
     // Manually set user  used with Firebase onAuthStateChanged
@@ -133,17 +132,20 @@ const authSlice = createSlice({
     builder
       .addCase(signUpUser.pending, (state) => {
         state.loading = true;
+        state.isSigningUp = true;
         state.error = null;
       })
-      .addCase(signUpUser.fulfilled, (state, action) => {
+      .addCase(signUpUser.fulfilled, (state) => {
         state.loading = false;
-        state.user = action.payload;
-        state.isAuthenticated = true;
+        state.isSigningUp = false;
+        state.user = null;
+        state.isAuthenticated = false;
         state.initializing = false;
-        console.log("SignUp Redux state updated:", action.payload);
+        console.log("SignUp successful, user must login manually.");
       })
       .addCase(signUpUser.rejected, (state, action) => {
         state.loading = false;
+        state.isSigningUp = false;
         state.error = action.payload;
       })
 

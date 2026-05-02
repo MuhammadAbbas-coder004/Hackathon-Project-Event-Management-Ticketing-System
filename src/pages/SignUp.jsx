@@ -31,8 +31,8 @@ function SignUp() {
         signUpUser({ email, password, name: fullName, role: "attendee" })
       ).unwrap();
 
-      alert("Account created successfully!");
-      navigate("/", { replace: true });
+      alert("Account created successfully! Please login to continue.");
+      navigate("/login", { replace: true });
     } catch (err) {
       console.error("Signup error:", err);
       alert("Signup failed: " + err);
@@ -59,7 +59,9 @@ function SignUp() {
 
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded-lg text-sm mb-4 text-center">
-              {error}
+              {error.includes("email-already-in-use") 
+                ? "This email is already registered. Please Login instead or use a different email." 
+                : error}
             </div>
           )}
 

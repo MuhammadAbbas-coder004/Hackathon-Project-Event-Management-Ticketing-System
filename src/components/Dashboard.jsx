@@ -11,7 +11,11 @@ function Dashboard() {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [attendees, setAttendees] = useState([]);
   const [attendeeLoading, setAttendeeLoading] = useState(false);
-  const [organizerName, setOrganizerName] = useState(user?.displayName || "Organizer");
+  const [organizerName, setOrganizerName] = useState(() => {
+    if (user?.displayName && user.displayName !== "User") return user.displayName;
+    if (user?.email === "mabbas@gmail.com") return "Muhammad Abbas";
+    return user?.email ? user.email.split('@')[0] : "Organizer";
+  });
   const [showValidate, setShowValidate] = useState(false);
   const [search, setSearch] = useState("");
 
@@ -24,11 +28,13 @@ function Dashboard() {
         const snap = await getDoc(userRef);
         if (snap.exists()) {
           const data = snap.data();
-          const fullName = data.displayName || data.fullName || `${data.firstName || ""} ${data.lastName || ""}`.trim();
-          if (fullName) setOrganizerName(fullName);
+          const fullName = data.displayName || data.fullName || data.name || `${data.firstName || ""} ${data.lastName || ""}`.trim();
+          if (fullName) {
+            setOrganizerName(fullName);
+          }
         }
       } catch (err) {
-        console.error("Error fetching organizer name:", err);
+        console.error("Error fetching organizer name in Dashboard:", err);
       }
     };
     fetchOrganizerName();
@@ -207,13 +213,32 @@ function Dashboard() {
                   onClick={() => fetchAttendees(event, false)}
                   className="flex-1 bg-gradient-to-r from-indigo-500 to-indigo-700 text-white py-2 rounded-xl hover:from-indigo-600 hover:to-indigo-800 transition-all duration-300 text-sm sm:text-base"
                 >
-                  View Attendees
+                  View
                 </button>
                 <button
                   onClick={() => fetchAttendees(event, true)}
                   className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white py-2 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300 text-sm sm:text-base"
                 >
-                  Validate Tickets
+                  Validate
+                </button>
+                <button
+                  onClick={async () => {
+                    if (window.confirm("Are you sure you want to delete this event?")) {
+                      try {
+                        const { deleteDoc, doc } = await import("firebase/firestore");
+                        await deleteDoc(doc(db, "events", event.id));
+                        setEvents(events.filter((e) => e.id !== event.id));
+                        alert("Event deleted successfully!");
+                      } catch (err) {
+                        alert("Error deleting event: " + err.message);
+                      }
+                    }
+                  }}
+                  className="px-4 bg-red-500 text-white py-2 rounded-xl hover:bg-red-600 transition-all duration-300"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
                 </button>
               </div>
             </div>

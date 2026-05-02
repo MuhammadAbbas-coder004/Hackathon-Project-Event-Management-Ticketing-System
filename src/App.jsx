@@ -1,7 +1,7 @@
 // src/App.jsx
 import React, { useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Provider, useDispatch } from "react-redux";
+import { Provider, useDispatch, useSelector } from "react-redux";
 import { store } from "./redux/store/store";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "./firebase/firebaseConfig/firebase";
@@ -28,9 +28,13 @@ import TicketScanner from "./pages/TicketScanner";
 // Auth Persistence Component
 function AuthProvider({ children }) {
   const dispatch = useDispatch();
+  const { isSigningUp } = useSelector((state) => state.auth);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      // If we are currently signing up, ignore the automatic login events from Firebase
+      if (isSigningUp) return;
+
       if (firebaseUser) {
         try {
           const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
@@ -62,7 +66,7 @@ function AuthProvider({ children }) {
             setUser({
               uid: firebaseUser.uid,
               email: firebaseUser.email,
-              displayName: firebaseUser.displayName || "User",
+              displayName: firebaseUser.displayName || (firebaseUser.email === "mabbas@gmail.com" ? "Muhammad Abbas" : firebaseUser.email.split('@')[0]),
               role: firebaseUser.email === "mabbas@gmail.com" ? "organizer" : "attendee",
             }),
           );
@@ -73,7 +77,7 @@ function AuthProvider({ children }) {
     });
 
     return () => unsubscribe();
-  }, [dispatch]);
+  }, [dispatch, isSigningUp]);
 
   return children;
 }
