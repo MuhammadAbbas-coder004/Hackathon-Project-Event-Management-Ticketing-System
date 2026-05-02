@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { db } from "../firebase/firebaseConfig/firebase";
 
 
@@ -11,18 +12,39 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 
 function Home() {
+  const navigate = useNavigate();
+  const user = useSelector((state) => state.auth.user);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Redirect organizers to dashboard 
+  useEffect(() => {
+    if (user && user.role === "organizer") {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [user, navigate]);
 
   // Fetch events
   useEffect(() => {
     const fetchEvents = async () => {
       try {
+        console.log("🔍 Attempting to fetch events from collection: 'events'...");
         const snapshot = await getDocs(collection(db, "events"));
-        const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        console.log("📊 Snapshot received. Number of documents found:", snapshot.size);
+        
+        if (snapshot.empty) {
+          console.warn("⚠️ The 'events' collection is empty in Firestore.");
+        }
+
+        const data = snapshot.docs.map((doc) => {
+          console.log("📄 Doc ID:", doc.id, "Data:", doc.data());
+          return { id: doc.id, ...doc.data() };
+        });
         setEvents(data);
       } catch (err) {
         console.error("Error fetching events:", err);
+        setError("Unable to load events. Please check your Firebase permissions.");
       } finally {
         setLoading(false);
       }
@@ -33,9 +55,22 @@ function Home() {
   const formatDate = (date) => (date ? new Date(date).toLocaleDateString() : "N/A");
 
   if (loading)
-    return <p className="text-center mt-10 text-gray-600 text-lg">Loading events...</p>;
+    return <p className="text-center mt-10 text-gray-600 text-lg font-medium animate-pulse">Loading events...</p>;
+  
+  if (user && user.role === "organizer") {
+    return null; // The useEffect will handle navigation
+  }
+
+  if (error)
+    return (
+      <div className="max-w-md mx-auto mt-10 p-6 bg-red-50 border border-red-200 rounded-2xl text-center">
+        <p className="text-red-700 font-semibold mb-2">{error}</p>
+        <p className="text-red-600 text-sm">Make sure your Firestore rules allow public reads for the 'events' collection.</p>
+      </div>
+    );
+
   if (events.length === 0)
-    return <p className="text-center mt-10 text-gray-600 text-lg">No events available.</p>;
+    return <p className="text-center mt-10 text-gray-600 text-lg font-medium">No events available at the moment.</p>;
 
   return (
     <div className="bg-gradient-to-b from-gray-50 to-gray-100 min-h-screen p-6">

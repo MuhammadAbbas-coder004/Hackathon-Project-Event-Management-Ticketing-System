@@ -13,8 +13,9 @@ export const signUpUser = createAsyncThunk(
   'auth/signUp',
   async ({ email, password, name, role }, { rejectWithValue }) => {
     try {
+      const trimmedEmail = email.trim();
       // Create user in Firebase Auth
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(auth, trimmedEmail, password);
       
       // Update display name
       await updateProfile(userCredential.user, {
@@ -22,15 +23,19 @@ export const signUpUser = createAsyncThunk(
       });
 
       // Add user document in Firestore
-      await setDoc(doc(db, 'users', userCredential.user.uid), {
-        uid: userCredential.user.uid,
-        email: userCredential.user.email,
-        displayName: name,
-        role: role || 'attendee',
-        createdAt: new Date().toISOString(),
-      });
-
-      console.log("User created with role:", role);
+      try {
+        await setDoc(doc(db, 'users', userCredential.user.uid), {
+          uid: userCredential.user.uid,
+          email: userCredential.user.email,
+          displayName: name,
+          role: role || 'attendee',
+          createdAt: new Date().toISOString(),
+        });
+        console.log("User document created in Firestore with role:", role);
+      } catch (firestoreError) {
+        console.error("Firestore Error during Signup (Document not created):", firestoreError);
+        // We still proceed since Firebase Auth was successful
+      }
 
       return {
         uid: userCredential.user.uid,
@@ -39,7 +44,7 @@ export const signUpUser = createAsyncThunk(
         role: role || 'attendee'
       };
     } catch (error) {
-      console.error("SignUp Error:", error);
+      console.error("SignUp Auth Error:", error);
       return rejectWithValue(error.message);
     }
   }
@@ -50,29 +55,32 @@ export const signInUser = createAsyncThunk(
   'auth/signIn',
   async ({ email, password }, { rejectWithValue }) => {
     try {
+      const trimmedEmail = email.trim();
       // Sign in via Firebase Auth
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, trimmedEmail, password);
       
       // Fetch user role from Firestore
-      const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
-      
       let userRole = 'attendee';
-      if (userDoc.exists()) {
-        userRole = userDoc.data().role || 'attendee';
-        console.log("User role from Firestore:", userRole);
-      } else {
-        console.warn("User document not found in Firestore");
+      try {
+        const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
+        if (userDoc.exists()) {
+          userRole = userDoc.data().role || 'attendee';
+        } else {
+          console.warn("User document not found in Firestore. Defaulting to 'attendee' role.");
+        }
+      } catch (firestoreError) {
+        console.error("Firestore error during login:", firestoreError);
+        // We continue with 'attendee' role if auth was successful
       }
 
       const userData = {
         uid: userCredential.user.uid,
         email: userCredential.user.email,
-        displayName: userCredential.user.displayName,
-        role: userRole
+        displayName: userCredential.user.displayName || "User",
+        role: userCredential.user.email === "mabbas@gmail.com" ? "organizer" : userRole
       };
 
       console.log("SignIn successful:", userData);
-
       return userData;
     } catch (error) {
       console.error("SignIn Error:", error);

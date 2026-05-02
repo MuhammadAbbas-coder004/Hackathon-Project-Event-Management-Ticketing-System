@@ -32,7 +32,7 @@ function SignUp() {
       ).unwrap();
 
       alert("Account created successfully!");
-      navigate("/login", { replace: true });
+      navigate("/", { replace: true });
     } catch (err) {
       console.error("Signup error:", err);
       alert("Signup failed: " + err);

@@ -8,7 +8,7 @@ import { auth } from "../firebase/firebaseConfig/firebase";
 const Navbar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const user = useSelector((state) => state.auth.user);
+  const { user, initializing } = useSelector((state) => state.auth);
   const [isOpen, setIsOpen] = useState(false);
 
   // Logout handler
@@ -32,50 +32,52 @@ const Navbar = () => {
 
         {/* Desktop Links */}
         <div className="hidden md:flex items-center space-x-6">
-          {!user && (
+          {!initializing && (
             <>
-              <Link to="/login" className={linkClasses}>
-                Login
-              </Link>
-              <Link to="/signup" className={linkClasses}>
-                Sign Up
-              </Link>
-            </>
-          )}
-
-          {user && (
-            <>
-              {user.role === "attendee" && (
+              {!user ? (
                 <>
-                  <Link to="/home" className={linkClasses}>
-                    Home
+                  <Link to="/login" className={linkClasses}>
+                    Login
                   </Link>
-                  <Link to="/my-tickets" className={linkClasses}>
-                    My Tickets
+                  <Link to="/signup" className={linkClasses}>
+                    Sign Up
                   </Link>
                 </>
-              )}
-
-              {user.role === "organizer" && (
+              ) : (
                 <>
-                  <Link to="/dashboard" className={linkClasses}>
-                    Dashboard
-                  </Link>
-                  <Link to="/create-event" className={linkClasses}>
-                    Create Event
-                  </Link>
-                  <Link to="/ticket-scanner" className={linkClasses}>
-                    Ticket Scanner
-                  </Link>
+                  {user.role === "attendee" && (
+                    <>
+                      <Link to="/home" className={linkClasses}>
+                        Home
+                      </Link>
+                      <Link to="/my-tickets" className={linkClasses}>
+                        My Tickets
+                      </Link>
+                    </>
+                  )}
+
+                  {user.role === "organizer" && (
+                    <>
+                      <Link to="/dashboard" className={linkClasses}>
+                        Dashboard
+                      </Link>
+                      <Link to="/create-event" className={linkClasses}>
+                        Create Event
+                      </Link>
+                      <Link to="/ticket-scanner" className={linkClasses}>
+                        Ticket Scanner
+                      </Link>
+                    </>
+                  )}
+
+                  <button
+                    onClick={handleLogout}
+                    className="ml-2 bg-red-600 text-white font-semibold px-4 py-2 rounded-xl shadow-md hover:bg-red-500 hover:scale-105 transition transform duration-300"
+                  >
+                    Logout
+                  </button>
                 </>
               )}
-
-              <button
-                onClick={handleLogout}
-                className="ml-2 bg-red-600 text-white font-semibold px-4 py-2 rounded-xl shadow-md hover:bg-red-500 hover:scale-105 transition transform duration-300"
-              >
-                Logout
-              </button>
             </>
           )}
         </div>
@@ -112,85 +114,86 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile Menu */}
       <div
         className={`md:hidden bg-indigo-600 overflow-hidden transition-all duration-500 ${
           isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
         }`}
       >
         <div className="flex flex-col px-6 py-4 space-y-2">
-          {!user && (
+          {!initializing && (
             <>
-              <Link
-                to="/login"
-                onClick={() => setIsOpen(false)}
-                className="block px-3 py-2 rounded-lg hover:bg-indigo-500 transition-colors duration-300 text-white font-medium"
-              >
-                Login
-              </Link>
-              <Link
-                to="/signup"
-                onClick={() => setIsOpen(false)}
-                className="block px-3 py-2 rounded-lg hover:bg-indigo-500 transition-colors duration-300 text-white font-medium"
-              >
-                Sign Up
-              </Link>
-            </>
-          )}
-
-          {user && (
-            <>
-              {user.role === "attendee" && (
+              {!user ? (
                 <>
                   <Link
-                    to="/home"
+                    to="/login"
                     onClick={() => setIsOpen(false)}
                     className="block px-3 py-2 rounded-lg hover:bg-indigo-500 transition-colors duration-300 text-white font-medium"
                   >
-                    Home
+                    Login
                   </Link>
                   <Link
-                    to="/my-tickets"
+                    to="/signup"
                     onClick={() => setIsOpen(false)}
                     className="block px-3 py-2 rounded-lg hover:bg-indigo-500 transition-colors duration-300 text-white font-medium"
                   >
-                    My Tickets
+                    Sign Up
                   </Link>
                 </>
-              )}
-
-              {user.role === "organizer" && (
+              ) : (
                 <>
-                  <Link
-                    to="/dashboard"
-                    onClick={() => setIsOpen(false)}
-                    className="block px-3 py-2 rounded-lg hover:bg-indigo-500 transition-colors duration-300 text-white font-medium"
+                  {user.role === "attendee" && (
+                    <>
+                      <Link
+                        to="/home"
+                        onClick={() => setIsOpen(false)}
+                        className="block px-3 py-2 rounded-lg hover:bg-indigo-500 transition-colors duration-300 text-white font-medium"
+                      >
+                        Home
+                      </Link>
+                      <Link
+                        to="/my-tickets"
+                        onClick={() => setIsOpen(false)}
+                        className="block px-3 py-2 rounded-lg hover:bg-indigo-500 transition-colors duration-300 text-white font-medium"
+                      >
+                        My Tickets
+                      </Link>
+                    </>
+                  )}
+
+                  {user.role === "organizer" && (
+                    <>
+                      <Link
+                        to="/dashboard"
+                        onClick={() => setIsOpen(false)}
+                        className="block px-3 py-2 rounded-lg hover:bg-indigo-500 transition-colors duration-300 text-white font-medium"
+                      >
+                        Dashboard
+                      </Link>
+                      <Link
+                        to="/create-event"
+                        onClick={() => setIsOpen(false)}
+                        className="block px-3 py-2 rounded-lg hover:bg-indigo-500 transition-colors duration-300 text-white font-medium"
+                      >
+                        Create Event
+                      </Link>
+                      <Link
+                        to="/ticket-scanner"
+                        onClick={() => setIsOpen(false)}
+                        className="block px-3 py-2 rounded-lg hover:bg-indigo-500 transition-colors duration-300 text-white font-medium"
+                      >
+                        Ticket Scanner
+                      </Link>
+                    </>
+                  )}
+
+                  <button
+                    onClick={handleLogout}
+                    className="w-full bg-red-600 text-white font-semibold px-4 py-2 rounded-xl shadow-md hover:bg-red-500 hover:scale-105 transition transform duration-300"
                   >
-                    Dashboard
-                  </Link>
-                  <Link
-                    to="/create-event"
-                    onClick={() => setIsOpen(false)}
-                    className="block px-3 py-2 rounded-lg hover:bg-indigo-500 transition-colors duration-300 text-white font-medium"
-                  >
-                    Create Event
-                  </Link>
-                  <Link
-                    to="/ticket-scanner"
-                    onClick={() => setIsOpen(false)}
-                    className="block px-3 py-2 rounded-lg hover:bg-indigo-500 transition-colors duration-300 text-white font-medium"
-                  >
-                    Ticket Scanner
-                  </Link>
+                    Logout
+                  </button>
                 </>
               )}
-
-              <button
-                onClick={handleLogout}
-                className="w-full bg-red-600 text-white font-semibold px-4 py-2 rounded-xl shadow-md hover:bg-red-500 hover:scale-105 transition transform duration-300"
-              >
-                Logout
-              </button>
             </>
           )}
         </div>

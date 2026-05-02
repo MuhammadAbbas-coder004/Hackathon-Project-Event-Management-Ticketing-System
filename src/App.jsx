@@ -41,15 +41,31 @@ function AuthProvider({ children }) {
                 uid: firebaseUser.uid,
                 email: firebaseUser.email,
                 displayName: firebaseUser.displayName || data.name,
-                role: data.role,
+                role: firebaseUser.email === "mabbas@gmail.com" ? "organizer" : (data.role || "attendee"),
               }),
             );
           } else {
-            dispatch(setUser(null));
+            // Fallback for cases where Auth user exists but Firestore doc doesn't (e.g. permission error during signup)
+            dispatch(
+              setUser({
+                uid: firebaseUser.uid,
+                email: firebaseUser.email,
+                displayName: firebaseUser.displayName || "User",
+                role: firebaseUser.email === "mabbas@gmail.com" ? "organizer" : "attendee",
+              }),
+            );
           }
         } catch (err) {
-          console.error(err);
-          dispatch(setUser(null));
+          console.error("Firestore fetch error in AuthProvider:", err);
+          // If Firestore fails, we still check the email to keep the organizer in their dashboard
+          dispatch(
+            setUser({
+              uid: firebaseUser.uid,
+              email: firebaseUser.email,
+              displayName: firebaseUser.displayName || "User",
+              role: firebaseUser.email === "mabbas@gmail.com" ? "organizer" : "attendee",
+            }),
+          );
         }
       } else {
         dispatch(setUser(null));
@@ -67,85 +83,88 @@ const App = () => {
     <Provider store={store}>
       <BrowserRouter>
         <AuthProvider>
-          {/* Navbar always visible */}
-          <Navbar />
+          <div className="flex flex-col min-h-screen">
+            {/* Navbar always visible */}
+            <Navbar />
 
-          <Routes>
-            {/* PUBLIC */}
-            <Route index element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<SignUp />} />
+            <main className="flex-grow">
+              <Routes>
+                {/* PUBLIC */}
+                <Route index element={<Home />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<SignUp />} />
 
-            {/* ATTENDEE */}
-            <Route
-              path="/home"
-              element={
-                <ProtectedRoutes role={["attendee"]} component={<Home />} />
-              }
-            />
-            <Route
-              path="/events/:id"
-              element={
-                <ProtectedRoutes
-                  role={["attendee"]}
-                  component={<EventDetails />}
+                {/* ATTENDEE */}
+                <Route
+                  path="/home"
+                  element={
+                    <ProtectedRoutes role={["attendee"]} component={<Home />} />
+                  }
                 />
-              }
-            />
-            <Route
-              path="/my-tickets"
-              element={
-                <ProtectedRoutes
-                  role={["attendee"]}
-                  component={<MyTickets />}
+                <Route
+                  path="/events/:id"
+                  element={
+                    <ProtectedRoutes
+                      role={["attendee", "organizer"]}
+                      component={<EventDetails />}
+                    />
+                  }
                 />
-              }
-            />
-            <Route
-              path="/ticket/:ticketId"
-              element={
-                <ProtectedRoutes role={["attendee"]} component={<Ticket />} />
-              }
-            />
-
-            {/* ORGANIZER */}
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoutes
-                  role={["organizer"]}
-                  component={<Organizer />}
+                <Route
+                  path="/my-tickets"
+                  element={
+                    <ProtectedRoutes
+                      role={["attendee"]}
+                      component={<MyTickets />}
+                    />
+                  }
                 />
-              }
-            />
-            <Route
-              path="/create-event"
-              element={
-                <ProtectedRoutes
-                  role={["organizer"]}
-                  component={<CreateEvent />}
+                <Route
+                  path="/ticket/:ticketId"
+                  element={
+                    <ProtectedRoutes role={["attendee"]} component={<Ticket />} />
+                  }
                 />
-              }
-            />
 
-            {/* Organizer TicketScanner */}
-            <Route
-              path="/ticket-scanner"
-              element={
-                <ProtectedRoutes
-                  role={["organizer"]}
-                  component={<TicketScanner />}
+                {/* ORGANIZER */}
+                <Route
+                  path="/dashboard"
+                  element={
+                    <ProtectedRoutes
+                      role={["organizer"]}
+                      component={<Organizer />}
+                    />
+                  }
                 />
-              }
-            />
+                <Route
+                  path="/create-event"
+                  element={
+                    <ProtectedRoutes
+                      role={["organizer"]}
+                      component={<CreateEvent />}
+                    />
+                  }
+                />
 
-            {/* FALLBACK */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+                {/* Organizer TicketScanner */}
+                <Route
+                  path="/ticket-scanner"
+                  element={
+                    <ProtectedRoutes
+                      role={["organizer"]}
+                      component={<TicketScanner />}
+                    />
+                  }
+                />
 
-          {/* Footer render */}
-          <Footer organizerName="Your Organizer Name" />
+                {/* FALLBACK */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </main>
 
+            {/* Footer render */}
+            <Footer organizerName="Your Organizer Name" />
+          </div>
         </AuthProvider>
       </BrowserRouter>
     </Provider>

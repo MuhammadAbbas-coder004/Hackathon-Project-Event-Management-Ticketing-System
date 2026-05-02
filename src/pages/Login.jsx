@@ -21,15 +21,7 @@ function Login() {
 
       if (signInUser.fulfilled.match(result)) {
         const user = result.payload;
-
-        const usersRef = collection(db, "users");
-        const q = query(usersRef, where("email", "==", user.email));
-        const querySnapshot = await getDocs(q);
-
-        let role = "attendee";
-        if (!querySnapshot.empty) {
-          role = querySnapshot.docs[0].data().role;
-        }
+        const role = user.role || "attendee";
 
         if (role === "organizer") {
           navigate("/dashboard", { replace: true });
@@ -62,7 +54,9 @@ function Login() {
 
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm mb-4 text-center">
-              {error}
+              {error.includes("invalid-credential") 
+                ? "Invalid email or password. If you haven't created an account yet, please Sign Up first." 
+                : error}
             </div>
           )}
 

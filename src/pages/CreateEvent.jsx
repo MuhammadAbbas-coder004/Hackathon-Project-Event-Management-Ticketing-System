@@ -45,8 +45,15 @@ function CreateEvent() {
       alert("Event created successfully!");
       navigate("/dashboard");
     } catch (err) {
-      console.error("Error creating event:", err);
-      alert("Failed to create event!");
+      console.error("🔥 Detailed Creation Error:", err);
+      console.error("Error Code:", err.code);
+      console.error("Error Message:", err.message);
+      
+      if (err.message.includes("permission")) {
+        alert("Permission Denied! Your Firestore Rules are still blocking writes. Please ensure you clicked 'PUBLISH' in the Firebase Console.");
+      } else {
+        alert(`Failed to create event!\nError Code: ${err.code}\nMessage: ${err.message}`);
+      }
     } finally {
       setLoading(false);
     }

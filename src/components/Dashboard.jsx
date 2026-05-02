@@ -11,11 +11,11 @@ function Dashboard() {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [attendees, setAttendees] = useState([]);
   const [attendeeLoading, setAttendeeLoading] = useState(false);
-  const [organizerName, setOrganizerName] = useState("");
+  const [organizerName, setOrganizerName] = useState(user?.displayName || "Organizer");
   const [showValidate, setShowValidate] = useState(false);
   const [search, setSearch] = useState("");
 
-  // Fetch organizer full name
+  // Fetch organizer full name from Firestore for latest data
   useEffect(() => {
     if (!user?.uid) return;
     const fetchOrganizerName = async () => {
@@ -24,8 +24,8 @@ function Dashboard() {
         const snap = await getDoc(userRef);
         if (snap.exists()) {
           const data = snap.data();
-          const fullName = data.fullName || `${data.firstName || ""} ${data.lastName || ""}`.trim();
-          setOrganizerName(fullName || data.name || user.email);
+          const fullName = data.displayName || data.fullName || `${data.firstName || ""} ${data.lastName || ""}`.trim();
+          if (fullName) setOrganizerName(fullName);
         }
       } catch (err) {
         console.error("Error fetching organizer name:", err);
@@ -34,16 +34,29 @@ function Dashboard() {
     fetchOrganizerName();
   }, [user]);
 
+  const [error, setError] = useState(null);
+
   // Fetch events
   useEffect(() => {
     const fetchEvents = async () => {
       try {
+        const { auth } = await import("../firebase/firebaseConfig/firebase");
+        console.log("👤 Current Auth User UID:", auth.currentUser?.uid);
+        console.log("📧 Current Auth User Email:", auth.currentUser?.email);
+        console.log("🔍 [Dashboard] Fetching events from: 'events'...");
         const ref = collection(db, "events");
         const snapshot = await getDocs(ref);
+        console.log("📊 [Dashboard] Documents found:", snapshot.size);
+
+        if (snapshot.empty) {
+          console.warn("⚠️ [Dashboard] No documents found in 'events' collection.");
+        }
+
         const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
         setEvents(data);
       } catch (err) {
         console.error("Error fetching events:", err);
+        setError(`Failed to fetch events: ${err.message}. Check your Firestore Rules and Project ID.`);
       } finally {
         setLoading(false);
       }
@@ -133,7 +146,22 @@ function Dashboard() {
       </div>
 
       {/* Events */}
-      <h2 className="text-lg sm:text-2xl font-semibold mb-4 text-gray-800">Your Events</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg sm:text-2xl font-semibold text-gray-800">Your Events</h2>
+      </div>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-2xl mb-6">
+          {error}
+        </div>
+      )}
+
+      {events.length === 0 && !loading && !error && (
+        <div className="bg-white p-10 rounded-3xl shadow-md text-center border border-dashed border-gray-300">
+          <p className="text-gray-500 text-lg">You haven't created any events yet.</p>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {events.map((event) => (
           <div
