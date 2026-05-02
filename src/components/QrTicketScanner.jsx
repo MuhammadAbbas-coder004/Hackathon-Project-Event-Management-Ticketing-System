@@ -87,16 +87,16 @@ function ScanTicket() {
 
             const ticket = { id: ticketSnap.id, ...ticketSnap.data() };
 
-            if (ticket.status === "checked") {
+            if (ticket.status === "used") {
               setTicketData(ticket);
               setError("Ticket already used");
               return;
             }
 
             const checkTime = new Date().toISOString();
-            await updateDoc(ticketRef, { status: "checked", checkedAt: checkTime });
+            await updateDoc(ticketRef, { status: "used", usedAt: checkTime });
 
-            setTicketData({ ...ticket, status: "checked", checkedAt: checkTime });
+            setTicketData({ ...ticket, status: "used", usedAt: checkTime });
           } catch (err) {
             setError(err?.message || "Invalid QR Code");
           }
@@ -184,7 +184,7 @@ function ScanTicket() {
             <p><strong>Email:</strong> {ticketData.email}</p>
             <p><strong>Ticket ID:</strong> {ticketData.id}</p>
             <p><strong>Date:</strong> {ticketData.eventDate}</p>
-            {ticketData.checkedAt && <p><strong>Checked At:</strong> {new Date(ticketData.checkedAt).toLocaleString()}</p>}
+            {ticketData.usedAt && <p><strong>Used At:</strong> {new Date(ticketData.usedAt).toLocaleString()}</p>}
             <button
               onClick={resetScanner}
               className="w-full mt-3 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg font-semibold transition duration-200"
